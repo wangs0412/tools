@@ -317,4 +317,76 @@ document.getElementById('angleRadianInput').addEventListener('input', convertAng
 document.getElementById('coordDegreeInput').addEventListener('input', convertCoordinate);
 document.getElementById('secondInput').addEventListener('input', convertCoordinate);
 document.getElementById('millisecondInput').addEventListener('input', convertCoordinate);
-document.getElementById('subsecondInput').addEventListener('input', convertCoordinate); 
+document.getElementById('subsecondInput').addEventListener('input', convertCoordinate);
+
+// 时间信息显示功能
+let currentWeekNumber = 0;
+let isHoliday = false;
+let holidayInfo = '';
+
+// 获取节假日信息的函数
+async function fetchHolidayInfo() {
+    try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
+        const response = await fetch(`https://timor.tech/api/holiday/info/${dateStr}`);
+        if (!response.ok) {
+            throw new Error('API请求失败');
+        }
+        const data = await response.json();
+        
+        if (data.code === 0) {
+            isHoliday = data.holiday !== null;
+            holidayInfo = isHoliday ? ` · ${data.holiday.name}` : '';
+        }
+    } catch (error) {
+        console.error('获取节假日信息失败，使用本地时间:', error);
+        isHoliday = false;
+        holidayInfo = '';
+    }
+}
+
+function updateDateTimeInfo() {
+    const now = new Date();
+    // 使用Intl.DateTimeFormat来确保正确显示本地时间
+    const formatter = new Intl.DateTimeFormat('zh-CN', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const dateTime = {};
+    parts.forEach(part => {
+        dateTime[part.type] = part.value;
+    });
+    
+    const weekDays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    const week = weekDays[now.getDay()];
+    
+    // 计算周数（本地计算）
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const firstDay = yearStart.getDay();
+    const days = Math.floor((now - yearStart) / (24 * 60 * 60 * 1000));
+    currentWeekNumber = Math.floor((days + firstDay) / 7) + 1;
+    
+    const info = `${dateTime.year}年${dateTime.month}月${dateTime.day}日 ${dateTime.hour}:${dateTime.minute}:${dateTime.second} CST<br>${week}${holidayInfo}<br>第${currentWeekNumber}周`;
+    document.getElementById('datetime-info').innerHTML = info;
+}
+
+// 初始化时获取节假日信息
+fetchHolidayInfo();
+// 每小时更新一次节假日信息
+setInterval(fetchHolidayInfo, 3600000);
+// 每秒更新时间显示
+setInterval(updateDateTimeInfo, 1000);
+updateDateTimeInfo(); 
