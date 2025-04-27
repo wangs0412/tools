@@ -146,8 +146,8 @@ function convertSpeed() {
 
 // 角度弧度转换功能
 function convertAngle() {
-    const degreeInput = document.getElementById('degreeInput');
-    const radianInput = document.getElementById('radianInput');
+    const degreeInput = document.getElementById('angleDegreeInput');
+    const radianInput = document.getElementById('angleRadianInput');
     
     // 获取当前输入框的值（经过验证和过滤）
     const degreeValue = validateInput(degreeInput, 'float');
@@ -174,43 +174,56 @@ function convertAngle() {
     }
 }
 
+const SECONDS_PER_DEGREE = 3600.0;
+const MILLI_PER_SECOND = 1000.0;
+const MICRO2560_PER_SECOND = 2560.0;
+
 // 经纬度转换功能
 function convertCoordinate() {
-    const degreeInput = document.getElementById('degreeInput');
+    const degreeInput = document.getElementById('coordDegreeInput');
     const secondInput = document.getElementById('secondInput');
     const millisecondInput = document.getElementById('millisecondInput');
     const subsecondInput = document.getElementById('subsecondInput');
-    const mcodeInput = document.getElementById('mcodeInput');
-    
-    // 获取当前输入框的值（经过验证和过滤）
-    const degreeValue = validateInput(degreeInput, 'float');
-    const secondValue = validateInput(secondInput, 'float');
-    const millisecondValue = validateInput(millisecondInput, 'float');
-    const subsecondValue = validateInput(subsecondInput, 'float');
-    const mcodeValue = validateInput(mcodeInput, 'float');
     
     // 确定哪个输入框被修改
     const activeInput = document.activeElement;
     
     try {
-        let totalSeconds;  // 使用秒作为中间单位
+        let lon2560, lat2560;  // 使用1/2560秒作为中间单位
         
         // 根据当前输入框计算总秒数
-        if (activeInput === degreeInput && degreeValue) {
-            totalSeconds = parseFloat(degreeValue) * 3600;  // 度转秒
-            updateAllInputs(totalSeconds);
-        } else if (activeInput === secondInput && secondValue) {
-            totalSeconds = parseFloat(secondValue);
-            updateAllInputs(totalSeconds);
-        } else if (activeInput === millisecondInput && millisecondValue) {
-            totalSeconds = parseFloat(millisecondValue) / 1000;
-            updateAllInputs(totalSeconds);
-        } else if (activeInput === subsecondInput && subsecondValue) {
-            totalSeconds = parseFloat(subsecondValue) / 2560;
-            updateAllInputs(totalSeconds);
-        } else if (activeInput === mcodeInput && mcodeValue) {
-            totalSeconds = parseFloat(mcodeValue) * 3600 / 2560;  // mcode转秒
-            updateAllInputs(totalSeconds);
+        if (activeInput === degreeInput) {
+            const value = validateCoordinateInput(degreeInput, 'float');
+            if (value) {
+                const [deg1, deg2] = value.split(' ').map(Number);
+                lon2560 = deg1 * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+                lat2560 = deg2 * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === secondInput) {
+            const value = validateCoordinateInput(secondInput, 'float');
+            if (value) {
+                const [sec1, sec2] = value.split(' ').map(Number);
+                lon2560 = sec1 * MICRO2560_PER_SECOND;
+                lat2560 = sec2 * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === millisecondInput) {
+            const value = validateCoordinateInput(millisecondInput, 'decimal');
+            if (value) {
+                const [ms1, ms2] = value.split(' ').map(Number);
+                lon2560 = (ms1 / MILLI_PER_SECOND) * MICRO2560_PER_SECOND;
+                lat2560 = (ms2 / MILLI_PER_SECOND) * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === subsecondInput) {
+            const value = validateCoordinateInput(subsecondInput, 'decimal');
+            if (value) {
+                const [ss1, ss2] = value.split(' ').map(Number);
+                lon2560 = ss1;
+                lat2560 = ss2;
+                updateAllInputs(lon2560, lat2560);
+            }
         }
     } catch (error) {
         // 如果转换失败，清空其他输入框
@@ -218,24 +231,74 @@ function convertCoordinate() {
         if (activeInput !== secondInput) secondInput.value = '';
         if (activeInput !== millisecondInput) millisecondInput.value = '';
         if (activeInput !== subsecondInput) subsecondInput.value = '';
-        if (activeInput !== mcodeInput) mcodeInput.value = '';
     }
 }
 
+// 验证经纬度输入
+function validateCoordinateInput(input, type) {
+    let value = input.value;
+    
+    // 预处理输入值
+    // 1. 去除前后空格
+    value = value.trim();
+    // 2. 将多个空格替换为单个空格
+    value = value.replace(/\s+/g, ' ');
+    
+    let filteredValue = '';
+    
+    // 分割输入值
+    const parts = value.split(' ');
+    if (parts.length !== 2) {
+        return '';  // 如果不是两组数字，返回空字符串
+    }
+    
+    // 验证每组数字
+    const validatedParts = parts.map(part => {
+        let filteredPart = '';
+        switch(type) {
+            case 'float':
+                // 允许数字和小数点，但确保只有一个小数点
+                filteredPart = part.replace(/[^0-9.]/g, '');
+                const decimalParts = filteredPart.split('.');
+                if (decimalParts.length > 2) {
+                    filteredPart = decimalParts[0] + '.' + decimalParts.slice(1).join('');
+                }
+                // 限制小数位数为6位
+                if (decimalParts.length === 2) {
+                    filteredPart = decimalParts[0] + '.' + decimalParts[1].slice(0, 6);
+                }
+                break;
+            case 'decimal':
+                // 只允许数字
+                filteredPart = part.replace(/[^0-9]/g, '');
+                break;
+        }
+        return filteredPart;
+    });
+    
+    // 组合验证后的值
+    filteredValue = validatedParts.join(' ');
+    
+    // 如果过滤后的值与原值不同，更新输入框
+    if (filteredValue !== value) {
+        input.value = filteredValue;
+    }
+    
+    return filteredValue;
+}
+
 // 更新所有输入框的值
-function updateAllInputs(totalSeconds) {
-    const degreeInput = document.getElementById('degreeInput');
+function updateAllInputs(lon2560, lat2560) {
+    const degreeInput = document.getElementById('coordDegreeInput');
     const secondInput = document.getElementById('secondInput');
     const millisecondInput = document.getElementById('millisecondInput');
     const subsecondInput = document.getElementById('subsecondInput');
-    const mcodeInput = document.getElementById('mcodeInput');
     
     // 更新各个单位的值
-    degreeInput.value = (totalSeconds / 3600).toFixed(6);
-    secondInput.value = totalSeconds.toFixed(6);
-    millisecondInput.value = (totalSeconds * 1000).toFixed(6);
-    subsecondInput.value = (totalSeconds * 2560).toFixed(6);
-    mcodeInput.value = (totalSeconds * 2560 / 3600).toFixed(6);
+    degreeInput.value = `${(lon2560 / SECONDS_PER_DEGREE / MICRO2560_PER_SECOND).toFixed(6)} ${(lat2560 / SECONDS_PER_DEGREE / MICRO2560_PER_SECOND).toFixed(6)}`;
+    secondInput.value = `${(lon2560 / MICRO2560_PER_SECOND).toFixed(4)} ${(lat2560 / MICRO2560_PER_SECOND).toFixed(4)}`;
+    millisecondInput.value = `${Math.floor(lon2560 / MICRO2560_PER_SECOND * 1000)} ${Math.floor(lat2560 / MICRO2560_PER_SECOND * 1000)}`;
+    subsecondInput.value = `${Math.floor(lon2560)} ${Math.floor(lat2560)}`;
 }
 
 // 添加实时转换事件监听
@@ -247,12 +310,11 @@ document.getElementById('mpsInput').addEventListener('input', convertSpeed);
 document.getElementById('kmhInput').addEventListener('input', convertSpeed);
 document.getElementById('mphInput').addEventListener('input', convertSpeed);
 
-document.getElementById('degreeInput').addEventListener('input', convertAngle);
-document.getElementById('radianInput').addEventListener('input', convertAngle);
+document.getElementById('angleDegreeInput').addEventListener('input', convertAngle);
+document.getElementById('angleRadianInput').addEventListener('input', convertAngle);
 
 // 添加经纬度转换的事件监听
-document.getElementById('degreeInput').addEventListener('input', convertCoordinate);
+document.getElementById('coordDegreeInput').addEventListener('input', convertCoordinate);
 document.getElementById('secondInput').addEventListener('input', convertCoordinate);
 document.getElementById('millisecondInput').addEventListener('input', convertCoordinate);
-document.getElementById('subsecondInput').addEventListener('input', convertCoordinate);
-document.getElementById('mcodeInput').addEventListener('input', convertCoordinate); 
+document.getElementById('subsecondInput').addEventListener('input', convertCoordinate); 

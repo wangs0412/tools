@@ -15,7 +15,7 @@
             <button class="tool-btn active" data-tool="number">进制转换</button>
             <button class="tool-btn" data-tool="speed">速度单位转换</button>
             <button class="tool-btn" data-tool="angle">角度弧度转换</button>
-            <button class="tool-btn" data-tool="coordinate" disabled>经纬度转换</button>
+            <button class="tool-btn" data-tool="coordinate">经纬度转换</button>
         </div>
 
         <!-- 工具内容区域 -->
@@ -61,11 +61,11 @@
                 <div class="input-group">
                     <div class="input-item">
                         <label>角度</label>
-                        <input type="text" id="degreeInput" placeholder="输入角度">
+                        <input type="text" id="angleDegreeInput" placeholder="输入角度">
                     </div>
                     <div class="input-item">
                         <label>弧度</label>
-                        <input type="text" id="radianInput" placeholder="输入弧度">
+                        <input type="text" id="angleRadianInput" placeholder="输入弧度">
                     </div>
                 </div>
             </div>
@@ -75,23 +75,19 @@
                 <div class="input-group">
                     <div class="input-item">
                         <label>度</label>
-                        <input type="text" id="degreeInput" placeholder="输入度">
+                        <input type="text" id="coordDegreeInput" placeholder="输入经纬度，用空格分隔">
                     </div>
                     <div class="input-item">
                         <label>秒</label>
-                        <input type="text" id="secondInput" placeholder="输入秒">
+                        <input type="text" id="secondInput" placeholder="输入经纬度，用空格分隔">
                     </div>
                     <div class="input-item">
                         <label>1/1000秒</label>
-                        <input type="text" id="millisecondInput" placeholder="输入1/1000秒">
+                        <input type="text" id="millisecondInput" placeholder="输入经纬度，用空格分隔">
                     </div>
                     <div class="input-item">
                         <label>1/2560秒</label>
-                        <input type="text" id="subsecondInput" placeholder="输入1/2560秒">
-                    </div>
-                    <div class="input-item">
-                        <label>mcode</label>
-                        <input type="text" id="mcodeInput" placeholder="输入mcode">
+                        <input type="text" id="subsecondInput" placeholder="输入经纬度，用空格分隔">
                     </div>
                 </div>
             </div>
