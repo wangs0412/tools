@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>实用工具集</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- 添加 Leaflet.js 的 CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- 添加 Leaflet.js 的 JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div id="datetime-info"></div>
@@ -15,6 +19,7 @@
             <button class="tool-btn" data-tool="speed">速度单位转换</button>
             <button class="tool-btn" data-tool="angle">角度弧度转换</button>
             <button class="tool-btn" data-tool="coordinate">经纬度转换</button>
+            <button class="tool-btn" data-tool="map">地图查看</button>
         </div>
 
         <!-- 工具内容区域 -->
@@ -89,6 +94,12 @@
                         <input type="text" id="subsecondInput" placeholder="输入经纬度，用空格分隔">
                     </div>
                 </div>
+                <button id="viewOnMap" class="view-map-btn">在地图上查看</button>
+            </div>
+
+            <!-- 地图查看工具 -->
+            <div class="tool-section hidden" id="map-tool">
+                <div id="map"></div>
             </div>
         </div>
     </div>

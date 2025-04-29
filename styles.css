@@ -188,4 +188,32 @@ input::placeholder {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--hover-color);
+}
+
+/* 查看地图按钮样式 */
+.view-map-btn {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.view-map-btn:hover {
+    background-color: var(--hover-color);
+}
+
+/* 地图容器样式 */
+#map {
+    height: 500px;
+    width: 100%;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
 } 

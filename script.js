@@ -1,11 +1,41 @@
+// 全局变量
+let currentMap = null;
+let currentMarker = null;
+
 // 工具切换功能
 document.addEventListener('DOMContentLoaded', function() {
     const toolButtons = document.querySelectorAll('.tool-btn');
     const toolSections = document.querySelectorAll('.tool-section');
 
     // 设置默认显示的工具
-    document.getElementById('number-tool').classList.remove('hidden');  // 确保进制转换工具显示
-    document.querySelector('.tool-btn[data-tool="number"]').classList.add('active');  // 设置默认按钮为激活状态
+    document.getElementById('number-tool').classList.remove('hidden');
+    document.querySelector('.tool-btn[data-tool="number"]').classList.add('active');
+
+    // 查看地图按钮点击事件
+    document.getElementById('viewOnMap').addEventListener('click', function() {
+        // 获取输入的经纬度
+        const coordInput = document.getElementById('coordDegreeInput').value.trim();
+        if (!coordInput) {
+            alert('请输入经纬度');
+            return;
+        }
+
+        // 解析经纬度
+        const [lng, lat] = coordInput.split(' ').map(Number);
+        if (isNaN(lat) || isNaN(lng)) {
+            alert('请输入有效的经纬度');
+            return;
+        }
+
+        // 切换到地图页面
+        toolButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.tool-btn[data-tool="map"]').classList.add('active');
+        toolSections.forEach(section => section.classList.add('hidden'));
+        document.getElementById('map-tool').classList.remove('hidden');
+
+        // 更新地图位置
+        updateMapPosition(lat, lng);
+    });
 
     toolButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -18,7 +48,15 @@ document.addEventListener('DOMContentLoaded', function() {
             toolSections.forEach(section => section.classList.add('hidden'));
             // 显示选中的工具区域
             const toolId = button.getAttribute('data-tool');
-            document.getElementById(`${toolId}-tool`).classList.remove('hidden');
+            const toolSection = document.getElementById(`${toolId}-tool`);
+            toolSection.classList.remove('hidden');
+
+            // 如果是地图工具，初始化地图
+            if (toolId === 'map') {
+                if (!currentMap) {
+                    initMap(39.9042, 116.4074); // 默认显示北京
+                }
+            }
         });
     });
 });
@@ -389,4 +427,84 @@ fetchHolidayInfo();
 setInterval(fetchHolidayInfo, 3600000);
 // 每秒更新时间显示
 setInterval(updateDateTimeInfo, 1000);
-updateDateTimeInfo(); 
+updateDateTimeInfo();
+
+// 初始化地图
+function initMap(lat, lng) {
+    try {
+        // 创建地图实例
+        const map = L.map('map').setView([lat, lng], 12);
+
+        // 添加高德地图图层
+        const normalLayer = L.tileLayer('https://webrd{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+            subdomains: ['01', '02', '03', '04'],
+            attribution: '高德地图',
+            maxZoom: 18,
+            minZoom: 3
+        });
+
+        const satelliteLayer = L.tileLayer('https://webst{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', {
+            subdomains: ['01', '02', '03', '04'],
+            attribution: '高德地图',
+            maxZoom: 18,
+            minZoom: 3
+        });
+
+        // 默认显示普通地图
+        normalLayer.addTo(map);
+
+        // 添加标记
+        const marker = L.marker([lat, lng]).addTo(map)
+            .bindPopup(`经纬度: ${lat}, ${lng}`)
+            .openPopup();
+
+        // 添加图层控制
+        const baseMaps = {
+            "卫星图": satelliteLayer,
+            "街道图": normalLayer
+        };
+
+        L.control.layers(baseMaps).addTo(map);
+
+        // 添加比例尺
+        L.control.scale().addTo(map);
+
+        // 保存地图实例和标记
+        currentMap = map;
+        currentMarker = marker;
+
+    } catch (error) {
+        console.error('地图初始化失败:', error);
+        alert('地图加载失败，请刷新页面重试');
+    }
+}
+
+// 更新地图位置
+function updateMapPosition(lat, lng) {
+    if (!currentMap) {
+        initMap(lat, lng);
+        return;
+    }
+
+    // 更新地图中心点
+    currentMap.setView([lat, lng], currentMap.getZoom());
+
+    // 更新标记位置
+    if (currentMarker) {
+        currentMarker.setLatLng([lat, lng])
+            .setPopupContent(`经纬度: ${lat}, ${lng}`)
+            .openPopup();
+    } else {
+        currentMarker = L.marker([lat, lng]).addTo(currentMap)
+            .bindPopup(`经纬度: ${lat}, ${lng}`)
+            .openPopup();
+    }
+}
+
+// 清空所有输入框
+function clearAllInputs() {
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.value = '';
+    });
+} 
