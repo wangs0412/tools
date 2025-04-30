@@ -28,10 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 切换到地图页面
-        toolButtons.forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.tool-btn[data-tool="map"]').classList.add('active');
-        toolSections.forEach(section => section.classList.add('hidden'));
-        document.getElementById('map-tool').classList.remove('hidden');
+        document.querySelector('.tool-btn[data-tool="map"]').click();
 
         // 更新地图位置
         updateMapPosition(lat, lng);
@@ -39,23 +36,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     toolButtons.forEach(button => {
         button.addEventListener('click', () => {
+            const toolId = button.getAttribute('data-tool');
+            
             // 移除所有按钮的active类
             toolButtons.forEach(btn => btn.classList.remove('active'));
             // 添加当前按钮的active类
             button.classList.add('active');
 
-            // 隐藏所有工具区域
-            toolSections.forEach(section => section.classList.add('hidden'));
-            // 显示选中的工具区域
-            const toolId = button.getAttribute('data-tool');
-            const toolSection = document.getElementById(`${toolId}-tool`);
-            toolSection.classList.remove('hidden');
-
-            // 如果是地图工具，初始化地图
+            // 控制时间显示和tools-container的显示/隐藏
+            const datetimeInfo = document.getElementById('datetime-info');
+            const toolsContainer = document.querySelector('.tools-container');
+            const map = document.getElementById('map');
+            
             if (toolId === 'map') {
+                datetimeInfo.style.display = 'none';
+                toolsContainer.style.display = 'none';
+                map.classList.remove('hidden');
                 if (!currentMap) {
                     initMap(39.9042, 116.4074); // 默认显示北京
                 }
+            } else {
+                datetimeInfo.style.display = 'block';
+                toolsContainer.style.display = 'block';
+                map.classList.add('hidden');
+
+                // 显示对应的工具区域
+                const toolSections = toolsContainer.querySelectorAll('.tool-section');
+                toolSections.forEach(section => {
+                    if (section.id === `${toolId}-tool`) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
             }
         });
     });

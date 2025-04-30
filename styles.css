@@ -25,7 +25,8 @@ body {
 }
 
 .container {
-    max-width: 1000px;
+    width: 100%;
+    max-width: min(1200px, 90vw);
     margin: 0 auto;
     padding: 20px;
 }
@@ -80,6 +81,8 @@ h1 {
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px var(--shadow-color);
+    width: 80%;
+    margin: 0 auto;
 }
 
 .tool-section {
@@ -211,9 +214,15 @@ input::placeholder {
 
 /* 地图容器样式 */
 #map {
-    height: 500px;
+    display: none;
+    height: 80vh;
     width: 100%;
-    margin-top: 20px;
-    border: 1px solid #ccc;
+    margin: 30px auto;
+    border-radius: 12px;
     background-color: #f0f0f0;
-} 
+    box-shadow: 0 4px 20px var(--shadow-color);
+}
+
+#map:not(.hidden) {
+    display: block;
+}
