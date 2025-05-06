@@ -482,6 +482,26 @@ function initMap(lat, lng) {
         // 添加比例尺
         L.control.scale().addTo(map);
 
+        // 添加点击事件监听器
+        map.on('click', function(e) {
+            const clickedLat = e.latlng.lat.toFixed(6);
+            const clickedLng = e.latlng.lng.toFixed(6);
+            
+            // 更新标记位置
+            if (currentMarker) {
+                currentMarker.setLatLng([clickedLat, clickedLng])
+                    .setPopupContent(`经纬度: ${clickedLat}, ${clickedLng}`)
+                    .openPopup();
+            } else {
+                currentMarker = L.marker([clickedLat, clickedLng]).addTo(map)
+                    .bindPopup(`经纬度: ${clickedLat}, ${clickedLng}`)
+                    .openPopup();
+            }
+
+            const lon2560 = clickedLng * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+            const lat2560 = clickedLat * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+            updateAllInputs(lon2560, lat2560);
+        });
         // 保存地图实例和标记
         currentMap = map;
         currentMarker = marker;
