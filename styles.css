@@ -50,6 +50,8 @@ h1 {
     gap: 1rem;
     margin-bottom: 2rem;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
 }
 
 .tool-btn {
@@ -215,14 +217,19 @@ input::placeholder {
 /* 地图容器样式 */
 #map {
     display: none;
-    height: 80vh;
-    width: 100%;
-    margin: 30px auto;
-    border-radius: 12px;
-    background-color: #f0f0f0;
-    box-shadow: 0 4px 20px var(--shadow-color);
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
 }
 
 #map:not(.hidden) {
     display: block;
+}
+
+#map:not(.hidden) ~ .tools-container,
+#map:not(.hidden) ~ #datetime-info {
+    display: none;
 }
