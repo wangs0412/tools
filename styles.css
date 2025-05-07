@@ -233,3 +233,161 @@ input::placeholder {
 #map:not(.hidden) ~ #datetime-info {
     display: none;
 }
+
+/* RGB颜色查询工具样式 */
+.color-preview {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#colorDisplay {
+    width: 200px;
+    height: 100px;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#hexValue {
+    margin-top: 10px;
+    font-size: 18px;
+    font-family: monospace;
+}
+
+/* 颜色输入组样式 */
+.color-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.input-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-item label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.input-item input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.input-item input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .color-inputs {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 颜色代码展示样式 */
+.color-codes-btn {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.color-codes-btn:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.color-codes-list {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.color-codes-list.hidden {
+    display: none;
+}
+
+.color-code-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background-color: var(--card-background);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.color-code-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.color-name {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.color-hex {
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--secondary-color);
+    flex-shrink: 0;
+}
+
+/* 自定义滚动条样式 */
+.color-codes-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.color-codes-list::-webkit-scrollbar-track {
+    background: var(--background-color);
+    border-radius: 3px;
+}
+
+.color-codes-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+.color-codes-list::-webkit-scrollbar-thumb:hover {
+    background: var(--hover-color);
+}

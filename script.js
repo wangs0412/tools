@@ -72,6 +72,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    initRGBTool();
 });
 
 // 输入验证和过滤功能
@@ -540,4 +542,177 @@ function clearAllInputs() {
     inputs.forEach(input => {
         input.value = '';
     });
+}
+
+// RGB颜色查询功能
+function initRGBTool() {
+    const redInput = document.getElementById('redInput');
+    const greenInput = document.getElementById('greenInput');
+    const blueInput = document.getElementById('blueInput');
+    const hueInput = document.getElementById('hueInput');
+    const saturationInput = document.getElementById('saturationInput');
+    const valueInput = document.getElementById('valueInput');
+    const colorDisplay = document.getElementById('colorDisplay');
+    const hexValue = document.getElementById('hexValue');
+    const showColorCodesBtn = document.getElementById('showColorCodes');
+    const colorCodesList = document.getElementById('colorCodesList');
+
+    // RGB转HSV
+    function rgbToHsv(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const delta = max - min;
+
+        let h = 0;
+        let s = max === 0 ? 0 : delta / max;
+        let v = max;
+
+        if (delta !== 0) {
+            if (max === r) {
+                h = ((g - b) / delta) % 6;
+            } else if (max === g) {
+                h = (b - r) / delta + 2;
+            } else {
+                h = (r - g) / delta + 4;
+            }
+
+            h = Math.round(h * 60);
+            if (h < 0) h += 360;
+        }
+
+        return {
+            h: Math.round(h),
+            s: Math.round(s * 100),
+            v: Math.round(v * 100)
+        };
+    }
+
+    // HSV转RGB
+    function hsvToRgb(h, s, v) {
+        h = h % 360;
+        s = s / 100;
+        v = v / 100;
+
+        const c = v * s;
+        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        const m = v - c;
+
+        let r, g, b;
+        if (h >= 0 && h < 60) {
+            [r, g, b] = [c, x, 0];
+        } else if (h >= 60 && h < 120) {
+            [r, g, b] = [x, c, 0];
+        } else if (h >= 120 && h < 180) {
+            [r, g, b] = [0, c, x];
+        } else if (h >= 180 && h < 240) {
+            [r, g, b] = [0, x, c];
+        } else if (h >= 240 && h < 300) {
+            [r, g, b] = [x, 0, c];
+        } else {
+            [r, g, b] = [c, 0, x];
+        }
+
+        return {
+            r: Math.round((r + m) * 255),
+            g: Math.round((g + m) * 255),
+            b: Math.round((b + m) * 255)
+        };
+    }
+
+    function updateColor() {
+        const activeInput = document.activeElement;
+        let r, g, b;
+
+        // 根据当前输入框确定颜色值
+        if (activeInput === hueInput || activeInput === saturationInput || activeInput === valueInput) {
+            const h = parseInt(hueInput.value) || 0;
+            const s = parseInt(saturationInput.value) || 0;
+            const v = parseInt(valueInput.value) || 0;
+
+            // 确保HSV值在有效范围内
+            const validH = Math.min(Math.max(h, 0), 360);
+            const validS = Math.min(Math.max(s, 0), 100);
+            const validV = Math.min(Math.max(v, 0), 100);
+
+            // 更新HSV输入框的值
+            hueInput.value = validH;
+            saturationInput.value = validS;
+            valueInput.value = validV;
+
+            // 转换为RGB
+            const rgb = hsvToRgb(validH, validS, validV);
+            r = rgb.r;
+            g = rgb.g;
+            b = rgb.b;
+
+            // 更新RGB输入框
+            redInput.value = r;
+            greenInput.value = g;
+            blueInput.value = b;
+        } else {
+            r = parseInt(redInput.value) || 0;
+            g = parseInt(greenInput.value) || 0;
+            b = parseInt(blueInput.value) || 0;
+
+            // 确保RGB值在有效范围内
+            r = Math.min(Math.max(r, 0), 255);
+            g = Math.min(Math.max(g, 0), 255);
+            b = Math.min(Math.max(b, 0), 255);
+
+            // 更新RGB输入框的值
+            redInput.value = r;
+            greenInput.value = g;
+            blueInput.value = b;
+
+            // 转换为HSV
+            const hsv = rgbToHsv(r, g, b);
+            hueInput.value = hsv.h;
+            saturationInput.value = hsv.s;
+            valueInput.value = hsv.v;
+        }
+
+        // 更新颜色显示
+        const hexColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        colorDisplay.style.backgroundColor = hexColor;
+        hexValue.textContent = hexColor.toUpperCase();
+    }
+
+    // 添加输入事件监听器
+    redInput.addEventListener('input', updateColor);
+    greenInput.addEventListener('input', updateColor);
+    blueInput.addEventListener('input', updateColor);
+    hueInput.addEventListener('input', updateColor);
+    saturationInput.addEventListener('input', updateColor);
+    valueInput.addEventListener('input', updateColor);
+
+    // 显示/隐藏颜色代码列表
+    showColorCodesBtn.addEventListener('click', () => {
+        colorCodesList.classList.toggle('hidden');
+        showColorCodesBtn.textContent = colorCodesList.classList.contains('hidden') ? 
+            '显示常用颜色代码' : '隐藏常用颜色代码';
+    });
+
+    // 为每个颜色项添加点击事件
+    const colorItems = colorCodesList.querySelectorAll('.color-code-item');
+    colorItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const hex = item.querySelector('.color-hex').textContent;
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            
+            redInput.value = r;
+            greenInput.value = g;
+            blueInput.value = b;
+            
+            updateColor();
+        });
+    });
+
+    // 初始化显示
+    updateColor();
 } 

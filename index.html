@@ -21,6 +21,7 @@
             <button class="tool-btn" data-tool="angle">角度弧度转换</button>
             <button class="tool-btn" data-tool="coordinate">经纬度转换</button>
             <button class="tool-btn" data-tool="map">地图查看</button>
+            <button class="tool-btn" data-tool="rgb">颜色转换</button>
         </div>
 
         <!-- 工具内容区域 -->
@@ -96,6 +97,480 @@
                     </div>
                 </div>
                 <button id="viewOnMap" class="view-map-btn">在地图上查看</button>
+            </div>
+
+            <!-- RGB颜色查询工具 -->
+            <div class="tool-section hidden" id="rgb-tool">
+                <div class="color-inputs">
+                    <div class="input-item">
+                        <label for="redInput">R (0-255)</label>
+                        <input type="number" id="redInput" min="0" max="255" placeholder="输入红色值">
+                    </div>
+                    <div class="input-item">
+                        <label for="hueInput">H (0-360)</label>
+                        <input type="number" id="hueInput" min="0" max="360" placeholder="输入色相值">
+                    </div>
+                    <div class="input-item">
+                        <label for="greenInput">G (0-255)</label>
+                        <input type="number" id="greenInput" min="0" max="255" placeholder="输入绿色值">
+                    </div>
+                    <div class="input-item">
+                        <label for="saturationInput">S (0-100)</label>
+                        <input type="number" id="saturationInput" min="0" max="100" placeholder="输入饱和度值">
+                    </div>
+                    <div class="input-item">
+                        <label for="blueInput">B (0-255)</label>
+                        <input type="number" id="blueInput" min="0" max="255" placeholder="输入蓝色值">
+                    </div>
+                    <div class="input-item">
+                        <label for="valueInput">V (0-100)</label>
+                        <input type="number" id="valueInput" min="0" max="100" placeholder="输入明度值">
+                    </div>
+                </div>
+                <div class="color-preview">
+                    <div id="colorDisplay"></div>
+                    <div id="hexValue"></div>
+                </div>
+                <button id="showColorCodes" class="color-codes-btn">显示常用颜色代码</button>
+                <div id="colorCodesList" class="color-codes-list hidden">
+                    <!-- 白色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFFFF"></div>
+                        <span class="color-hex">#FFFFFF</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFFF0"></div>
+                        <span class="color-hex">#FFFFF0</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFFE0"></div>
+                        <span class="color-hex">#FFFFE0</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFAFA"></div>
+                        <span class="color-hex">#FFFAFA</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFAF0"></div>
+                        <span class="color-hex">#FFFAF0</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFACD"></div>
+                        <span class="color-hex">#FFFACD</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFF8DC"></div>
+                        <span class="color-hex">#FFF8DC</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFF5EE"></div>
+                        <span class="color-hex">#FFF5EE</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFF0F5"></div>
+                        <span class="color-hex">#FFF0F5</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFEFDB"></div>
+                        <span class="color-hex">#FFEFDB</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFE4E1"></div>
+                        <span class="color-hex">#FFE4E1</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFE4C4"></div>
+                        <span class="color-hex">#FFE4C4</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFE4B5"></div>
+                        <span class="color-hex">#FFE4B5</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFDEAD"></div>
+                        <span class="color-hex">#FFDEAD</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFDAB9"></div>
+                        <span class="color-hex">#FFDAB9</span>
+                    </div>
+                    <!-- 红色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF0000"></div>
+                        <span class="color-hex">#FF0000</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF4500"></div>
+                        <span class="color-hex">#FF4500</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF6347"></div>
+                        <span class="color-hex">#FF6347</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF69B4"></div>
+                        <span class="color-hex">#FF69B4</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF1493"></div>
+                        <span class="color-hex">#FF1493</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFC0CB"></div>
+                        <span class="color-hex">#FFC0CB</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFB6C1"></div>
+                        <span class="color-hex">#FFB6C1</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFA07A"></div>
+                        <span class="color-hex">#FFA07A</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FA8072"></div>
+                        <span class="color-hex">#FA8072</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #E9967A"></div>
+                        <span class="color-hex">#E9967A</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #F08080"></div>
+                        <span class="color-hex">#F08080</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #CD5C5C"></div>
+                        <span class="color-hex">#CD5C5C</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #DC143C"></div>
+                        <span class="color-hex">#DC143C</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #B22222"></div>
+                        <span class="color-hex">#B22222</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #8B0000"></div>
+                        <span class="color-hex">#8B0000</span>
+                    </div>
+                    <!-- 绿色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #00FF00"></div>
+                        <span class="color-hex">#00FF00</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #32CD32"></div>
+                        <span class="color-hex">#32CD32</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #98FB98"></div>
+                        <span class="color-hex">#98FB98</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #90EE90"></div>
+                        <span class="color-hex">#90EE90</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #228B22"></div>
+                        <span class="color-hex">#228B22</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #7CFC00"></div>
+                        <span class="color-hex">#7CFC00</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #7FFF00"></div>
+                        <span class="color-hex">#7FFF00</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #ADFF2F"></div>
+                        <span class="color-hex">#ADFF2F</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #9ACD32"></div>
+                        <span class="color-hex">#9ACD32</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #556B2F"></div>
+                        <span class="color-hex">#556B2F</span>
+                    </div>
+                    <!-- 蓝色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #0000FF"></div>
+                        <span class="color-hex">#0000FF</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #1E90FF"></div>
+                        <span class="color-hex">#1E90FF</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #87CEEB"></div>
+                        <span class="color-hex">#87CEEB</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #00BFFF"></div>
+                        <span class="color-hex">#00BFFF</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #4169E1"></div>
+                        <span class="color-hex">#4169E1</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #6495ED"></div>
+                        <span class="color-hex">#6495ED</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #B0C4DE"></div>
+                        <span class="color-hex">#B0C4DE</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #ADD8E6"></div>
+                        <span class="color-hex">#ADD8E6</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #87CEFA"></div>
+                        <span class="color-hex">#87CEFA</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #00CED1"></div>
+                        <span class="color-hex">#00CED1</span>
+                    </div>
+                    <!-- 黄色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFFF00"></div>
+                        <span class="color-hex">#FFFF00</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFD700"></div>
+                        <span class="color-hex">#FFD700</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #DAA520"></div>
+                        <span class="color-hex">#DAA520</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #B8860B"></div>
+                        <span class="color-hex">#B8860B</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFA500"></div>
+                        <span class="color-hex">#FFA500</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFD700"></div>
+                        <span class="color-hex">#FFD700</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFC125"></div>
+                        <span class="color-hex">#FFC125</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFB90F"></div>
+                        <span class="color-hex">#FFB90F</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFA54F"></div>
+                        <span class="color-hex">#FFA54F</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF8C00"></div>
+                        <span class="color-hex">#FF8C00</span>
+                    </div>
+                    <!-- 紫色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #800080"></div>
+                        <span class="color-hex">#800080</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #8A2BE2"></div>
+                        <span class="color-hex">#8A2BE2</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #9932CC"></div>
+                        <span class="color-hex">#9932CC</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #BA55D3"></div>
+                        <span class="color-hex">#BA55D3</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #9370DB"></div>
+                        <span class="color-hex">#9370DB</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #8B008B"></div>
+                        <span class="color-hex">#8B008B</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #9400D3"></div>
+                        <span class="color-hex">#9400D3</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #4B0082"></div>
+                        <span class="color-hex">#4B0082</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #7B68EE"></div>
+                        <span class="color-hex">#7B68EE</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #6A5ACD"></div>
+                        <span class="color-hex">#6A5ACD</span>
+                    </div>
+                    <!-- 棕色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #A52A2A"></div>
+                        <span class="color-hex">#A52A2A</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #8B4513"></div>
+                        <span class="color-hex">#8B4513</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #D2691E"></div>
+                        <span class="color-hex">#D2691E</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #CD853F"></div>
+                        <span class="color-hex">#CD853F</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #DEB887"></div>
+                        <span class="color-hex">#DEB887</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #D2B48C"></div>
+                        <span class="color-hex">#D2B48C</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #BC8F8F"></div>
+                        <span class="color-hex">#BC8F8F</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #F4A460"></div>
+                        <span class="color-hex">#F4A460</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #DAA520"></div>
+                        <span class="color-hex">#DAA520</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #B8860B"></div>
+                        <span class="color-hex">#B8860B</span>
+                    </div>
+                    <!-- 灰色系 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #808080"></div>
+                        <span class="color-hex">#808080</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #A9A9A9"></div>
+                        <span class="color-hex">#A9A9A9</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #D3D3D3"></div>
+                        <span class="color-hex">#D3D3D3</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #696969"></div>
+                        <span class="color-hex">#696969</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #708090"></div>
+                        <span class="color-hex">#708090</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #778899"></div>
+                        <span class="color-hex">#778899</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #BEBEBE"></div>
+                        <span class="color-hex">#BEBEBE</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #C0C0C0"></div>
+                        <span class="color-hex">#C0C0C0</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #DCDCDC"></div>
+                        <span class="color-hex">#DCDCDC</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #F5F5F5"></div>
+                        <span class="color-hex">#F5F5F5</span>
+                    </div>
+                    <!-- 其他颜色 -->
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF00FF"></div>
+                        <span class="color-hex">#FF00FF</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #00FFFF"></div>
+                        <span class="color-hex">#00FFFF</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #7FFFD4"></div>
+                        <span class="color-hex">#7FFFD4</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF1493"></div>
+                        <span class="color-hex">#FF1493</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FF69B4"></div>
+                        <span class="color-hex">#FF69B4</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFB6C1"></div>
+                        <span class="color-hex">#FFB6C1</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFC0CB"></div>
+                        <span class="color-hex">#FFC0CB</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFE4E1"></div>
+                        <span class="color-hex">#FFE4E1</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FFA07A"></div>
+                        <span class="color-hex">#FFA07A</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #FA8072"></div>
+                        <span class="color-hex">#FA8072</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #E9967A"></div>
+                        <span class="color-hex">#E9967A</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #F08080"></div>
+                        <span class="color-hex">#F08080</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #CD5C5C"></div>
+                        <span class="color-hex">#CD5C5C</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #DC143C"></div>
+                        <span class="color-hex">#DC143C</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #B22222"></div>
+                        <span class="color-hex">#B22222</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #8B0000"></div>
+                        <span class="color-hex">#8B0000</span>
+                    </div>
+                    <div class="color-code-item">
+                        <div class="color-swatch" style="background-color: #000000"></div>
+                        <span class="color-hex">#000000</span>
+                    </div>
+                </div>
             </div>
         </div>
 
