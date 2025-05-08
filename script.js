@@ -465,6 +465,35 @@ function initMap(lat, lng) {
             minZoom: 3
         });
 
+        // 添加Google Maps图层
+        const googleNormalLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=m&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: 'Google Maps',
+            maxZoom: 20,
+            minZoom: 3
+        });
+
+        const googleSatelliteLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=s&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: 'Google Maps',
+            maxZoom: 20,
+            minZoom: 3
+        });
+
+        const googleTerrainLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=p&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: 'Google Maps',
+            maxZoom: 20,
+            minZoom: 3
+        });
+
+        const googleHybridLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: 'Google Maps',
+            maxZoom: 20,
+            minZoom: 3
+        });
+
         // 默认显示普通地图
         normalLayer.addTo(map);
 
@@ -475,8 +504,12 @@ function initMap(lat, lng) {
 
         // 添加图层控制
         const baseMaps = {
-            "卫星图": satelliteLayer,
-            "街道图": normalLayer
+            "高德街道图": normalLayer,
+            "高德卫星图": satelliteLayer,
+            "Google街道图": googleNormalLayer,
+            "Google卫星图": googleSatelliteLayer,
+            "Google地形图": googleTerrainLayer,
+            "Google混合图": googleHybridLayer
         };
 
         L.control.layers(baseMaps).addTo(map);
