@@ -2,8 +2,23 @@
 let currentMap = null;
 let currentMarker = null;
 
-// 工具切换功能
+// 主题切换功能
 document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    // 检查本地存储中的主题设置
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // 主题切换按钮点击事件
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+
     const toolButtons = document.querySelectorAll('.tool-btn');
     const toolSections = document.querySelectorAll('.tool-section');
 

@@ -15,6 +15,75 @@
     --hover-color: #3a5bef;
 }
 
+/* 暗色主题变量 */
+[data-theme="dark"] {
+    --primary-color: #6c8fff;
+    --secondary-color: #a0a0a0;
+    --background-color: #1a1a1a;
+    --card-background: #2d2d2d;
+    --text-color: #ffffff;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --hover-color: #8ba4ff;
+}
+
+/* 暗色主题下的输入框样式 */
+[data-theme="dark"] input {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border-color: #404040;
+}
+
+[data-theme="dark"] input::placeholder {
+    color: #808080;
+}
+
+[data-theme="dark"] input:focus {
+    border-color: var(--primary-color);
+    background-color: #2d2d2d;
+}
+
+/* 暗色主题下的标签文字 */
+[data-theme="dark"] .input-item label {
+    color: #cccccc;
+}
+
+/* 暗色主题下的工具按钮 */
+[data-theme="dark"] .tool-btn {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border-color: #404040;
+}
+
+[data-theme="dark"] .tool-btn:hover {
+    border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .tool-btn.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* 暗色主题下的颜色代码列表 */
+[data-theme="dark"] .color-codes-list {
+    background-color: #2d2d2d;
+}
+
+[data-theme="dark"] .color-code-item {
+    background-color: #1a1a1a;
+}
+
+[data-theme="dark"] .color-hex {
+    color: #cccccc;
+}
+
+/* 暗色主题下的时间信息显示 */
+[data-theme="dark"] #datetime-info {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border-color: #404040;
+}
+
 body {
     font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
     line-height: 1.6;
@@ -390,4 +459,108 @@ input::placeholder {
 
 .color-codes-list::-webkit-scrollbar-thumb:hover {
     background: var(--hover-color);
+}
+
+/* 邮件图标样式 */
+.email-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    opacity: 0.6;
+}
+
+.email-icon a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border-radius: 50%;
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.email-icon a:hover {
+    opacity: 1;
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.email-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .email-icon {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .email-icon a {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .email-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card-background);
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-color);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* 根据主题显示/隐藏图标 */
+[data-theme="dark"] .sun-icon {
+    display: none;
+}
+
+[data-theme="light"] .moon-icon {
+    display: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .theme-toggle {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+    }
+    
+    .theme-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
 }
