@@ -66,14 +66,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (toolId === 'map') {
                 datetimeInfo.style.display = 'none';
                 toolsContainer.style.display = 'none';
+                document.querySelector('.tool-buttons').style.display = 'none';
                 map.classList.remove('hidden');
+                document.getElementById('theme-toggle').style.display = 'none';
                 if (!currentMap) {
                     initMap(39.9042, 116.4074); // 默认显示北京
                 }
             } else {
                 datetimeInfo.style.display = 'block';
                 toolsContainer.style.display = 'block';
+                document.querySelector('.tool-buttons').style.display = 'flex';
                 map.classList.add('hidden');
+                document.getElementById('theme-toggle').style.display = 'flex';
 
                 // 显示对应的工具区域
                 const toolSections = toolsContainer.querySelectorAll('.tool-section');
@@ -531,6 +535,49 @@ function initMap(lat, lng) {
 
         // 添加比例尺
         L.control.scale().addTo(map);
+
+        // 添加返回按钮
+        const backButton = L.control({ position: 'topright' });
+        backButton.onAdd = function() {
+            const div = L.DomUtil.create('div', 'leaflet-control');
+            div.innerHTML = `
+                <a href="#" title="退出" style="
+                    background-color: #ffffff;
+                    border: 2px solid #696969;
+                    border-radius: 6px;
+                    width: 36px;
+                    height: 36px;
+                    line-height: 38px;
+                    display: block;
+                    text-align: center;
+                    text-decoration: none;
+                    color: #696969;
+                    font-weight: 900;
+                    font-size: 24px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    transition: all 0.3s ease;
+                    margin: 10px;
+                ">⟵</a>
+            `;
+            // 添加悬停效果
+            div.querySelector('a').onmouseover = function() {
+                this.style.backgroundColor = '#696969';
+                this.style.color = '#ffffff';
+                this.style.transform = 'scale(1.1)';
+            };
+            div.querySelector('a').onmouseout = function() {
+                this.style.backgroundColor = '#ffffff';
+                this.style.color = '#696969';
+                this.style.transform = 'scale(1)';
+            };
+            div.onclick = function(e) {
+                e.preventDefault();
+                // 触发第一个工具按钮的点击事件
+                document.querySelector('.tool-btn[data-tool="number"]').click();
+            };
+            return div;
+        };
+        backButton.addTo(map);
 
         // 添加点击事件监听器
         map.on('click', function(e) {
