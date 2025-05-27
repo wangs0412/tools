@@ -96,20 +96,24 @@
             <div class="tool-section hidden" id="coordinate-tool">
                 <div class="input-group">
                     <div class="input-item">
+                        <label for="coordDMSInput">度分秒</label>
+                        <input type="text" id="coordDMSInput" placeholder="输入度分秒格式经纬度，用空格分隔，如：116°24'26.64" 东 39°54'15.12" 北" autocomplete="off">
+                    </div>
+                    <div class="input-item">
                         <label for="coordDegreeInput">度</label>
-                        <input type="text" id="coordDegreeInput" placeholder="输入经纬度，用空格分隔" autocomplete="off">
+                        <input type="text" id="coordDegreeInput" placeholder="输入度格式经纬度，用空格分隔，如：116.4074 39.9042" autocomplete="off">
                     </div>
                     <div class="input-item">
                         <label for="secondInput">秒</label>
-                        <input type="text" id="secondInput" placeholder="输入经纬度，用空格分隔" autocomplete="off">
+                        <input type="text" id="secondInput" placeholder="输入秒格式经纬度，用空格分隔，如：419066.6400 143655.1200" autocomplete="off">
                     </div>
                     <div class="input-item">
                         <label for="millisecondInput">1/1000秒</label>
-                        <input type="text" id="millisecondInput" placeholder="输入经纬度，用空格分隔" autocomplete="off">
+                        <input type="text" id="millisecondInput" placeholder="输入1/1000秒格式经纬度，用空格分隔，如：419066639 143655120" autocomplete="off">
                     </div>
                     <div class="input-item">
                         <label for="subsecondInput">1/2560秒</label>
-                        <input type="text" id="subsecondInput" placeholder="输入经纬度，用空格分隔" autocomplete="off">
+                        <input type="text" id="subsecondInput" placeholder="输入1/2560秒格式经纬度，用空格分隔，如：1072810598 367757107" autocomplete="off">
                     </div>
                 </div>
                 <button id="viewOnMap" class="view-map-btn">在地图上查看</button>

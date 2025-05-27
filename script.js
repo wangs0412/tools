@@ -250,62 +250,6 @@ const SECONDS_PER_DEGREE = 3600.0;
 const MILLI_PER_SECOND = 1000.0;
 const MICRO2560_PER_SECOND = 2560.0;
 
-// 经纬度转换功能
-function convertCoordinate() {
-    const degreeInput = document.getElementById('coordDegreeInput');
-    const secondInput = document.getElementById('secondInput');
-    const millisecondInput = document.getElementById('millisecondInput');
-    const subsecondInput = document.getElementById('subsecondInput');
-    
-    // 确定哪个输入框被修改
-    const activeInput = document.activeElement;
-    
-    try {
-        let lon2560, lat2560;  // 使用1/2560秒作为中间单位
-        
-        // 根据当前输入框计算总秒数
-        if (activeInput === degreeInput) {
-            const value = validateCoordinateInput(degreeInput, 'float');
-            if (value) {
-                const [deg1, deg2] = value.split(' ').map(Number);
-                lon2560 = deg1 * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
-                lat2560 = deg2 * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
-                updateAllInputs(lon2560, lat2560);
-            }
-        } else if (activeInput === secondInput) {
-            const value = validateCoordinateInput(secondInput, 'float');
-            if (value) {
-                const [sec1, sec2] = value.split(' ').map(Number);
-                lon2560 = sec1 * MICRO2560_PER_SECOND;
-                lat2560 = sec2 * MICRO2560_PER_SECOND;
-                updateAllInputs(lon2560, lat2560);
-            }
-        } else if (activeInput === millisecondInput) {
-            const value = validateCoordinateInput(millisecondInput, 'decimal');
-            if (value) {
-                const [ms1, ms2] = value.split(' ').map(Number);
-                lon2560 = (ms1 / MILLI_PER_SECOND) * MICRO2560_PER_SECOND;
-                lat2560 = (ms2 / MILLI_PER_SECOND) * MICRO2560_PER_SECOND;
-                updateAllInputs(lon2560, lat2560);
-            }
-        } else if (activeInput === subsecondInput) {
-            const value = validateCoordinateInput(subsecondInput, 'decimal');
-            if (value) {
-                const [ss1, ss2] = value.split(' ').map(Number);
-                lon2560 = ss1;
-                lat2560 = ss2;
-                updateAllInputs(lon2560, lat2560);
-            }
-        }
-    } catch (error) {
-        // 如果转换失败，清空其他输入框
-        if (activeInput !== degreeInput) degreeInput.value = '';
-        if (activeInput !== secondInput) secondInput.value = '';
-        if (activeInput !== millisecondInput) millisecondInput.value = '';
-        if (activeInput !== subsecondInput) subsecondInput.value = '';
-    }
-}
-
 // 验证经纬度输入
 function validateCoordinateInput(input, type) {
     let value = input.value;
@@ -359,15 +303,164 @@ function validateCoordinateInput(input, type) {
     return filteredValue;
 }
 
-// 更新所有输入框的值
-function updateAllInputs(lon2560, lat2560) {
+// 验证度分秒格式输入
+function validateDMSInput(input) {
+    let value = input.value;
+    
+    // 预处理输入值
+    // 1. 去除前后空格
+    value = value.trim();
+    
+    // 2. 检查格式是否正确
+    const dmsRegex = /^(\d+)°(\d+)'(\d+\.?\d*)"\s*([东西])\s+(\d+)°(\d+)'(\d+\.?\d*)"\s*([北南])$/;
+    const match = value.match(dmsRegex);
+    
+    if (!match) {
+        return '';  // 如果格式不正确，返回空字符串
+    }
+    
+    // 3. 验证数值范围
+    const [_, lngDeg, lngMin, lngSec, lngDir, latDeg, latMin, latSec, latDir] = match;
+    
+    // 验证纬度
+    if (parseInt(latDeg) > 90 || parseInt(latMin) >= 60 || parseFloat(latSec) >= 60) {
+        return '';
+    }
+    
+    // 验证经度
+    if (parseInt(lngDeg) > 180 || parseInt(lngMin) >= 60 || parseFloat(lngSec) >= 60) {
+        return '';
+    }
+    
+    return value;
+}
+
+// 将度分秒转换为十进制度数
+function convertDMSToDecimal(dms) {
+    const dmsRegex = /^(\d+)°(\d+)'(\d+\.?\d*)"\s*([东西])\s+(\d+)°(\d+)'(\d+\.?\d*)"\s*([北南])$/;
+    const match = dms.match(dmsRegex);
+    
+    if (!match) {
+        return null;
+    }
+    
+    const [_, lngDeg, lngMin, lngSec, lngDir, latDeg, latMin, latSec, latDir] = match;
+    
+    // 计算经度
+    let lng = parseInt(lngDeg) + parseInt(lngMin) / 60 + parseFloat(lngSec) / 3600;
+    if (lngDir === '西') {
+        lng = -lng;
+    }
+    
+    // 计算纬度
+    let lat = parseInt(latDeg) + parseInt(latMin) / 60 + parseFloat(latSec) / 3600;
+    if (latDir === '南') {
+        lat = -lat;
+    }
+    
+    return [lng, lat];
+}
+
+// 将十进制度数转换为度分秒
+function convertDecimalToDMS(lng, lat) {
+    // 处理经度
+    const lngAbs = Math.abs(lng);
+    const lngDeg = Math.floor(lngAbs);
+    const lngMin = Math.floor((lngAbs - lngDeg) * 60);
+    const lngSec = ((lngAbs - lngDeg) * 60 - lngMin) * 60;
+    const lngDir = lng >= 0 ? '东' : '西';
+    
+    // 处理纬度
+    const latAbs = Math.abs(lat);
+    const latDeg = Math.floor(latAbs);
+    const latMin = Math.floor((latAbs - latDeg) * 60);
+    const latSec = ((latAbs - latDeg) * 60 - latMin) * 60;
+    const latDir = lat >= 0 ? '北' : '南';
+    
+    return `${lngDeg}°${lngMin}'${lngSec.toFixed(2)}" ${lngDir} ${latDeg}°${latMin}'${latSec.toFixed(2)}" ${latDir}`;
+}
+
+// 经纬度转换功能
+function convertCoordinate() {
+    const dmsInput = document.getElementById('coordDMSInput');
     const degreeInput = document.getElementById('coordDegreeInput');
     const secondInput = document.getElementById('secondInput');
     const millisecondInput = document.getElementById('millisecondInput');
     const subsecondInput = document.getElementById('subsecondInput');
     
+    // 确定哪个输入框被修改
+    const activeInput = document.activeElement;
+    
+    try {
+        let lon2560, lat2560;  // 使用1/2560秒作为中间单位
+        
+        // 根据当前输入框计算总秒数
+        if (activeInput === dmsInput) {
+            const value = validateDMSInput(dmsInput);
+            if (value) {
+                const [lng, lat] = convertDMSToDecimal(value);
+                lon2560 = lng * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+                lat2560 = lat * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === degreeInput) {
+            const value = validateCoordinateInput(degreeInput, 'float');
+            if (value) {
+                const [deg1, deg2] = value.split(' ').map(Number);
+                lon2560 = deg1 * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+                lat2560 = deg2 * SECONDS_PER_DEGREE * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === secondInput) {
+            const value = validateCoordinateInput(secondInput, 'float');
+            if (value) {
+                const [sec1, sec2] = value.split(' ').map(Number);
+                lon2560 = sec1 * MICRO2560_PER_SECOND;
+                lat2560 = sec2 * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === millisecondInput) {
+            const value = validateCoordinateInput(millisecondInput, 'decimal');
+            if (value) {
+                const [ms1, ms2] = value.split(' ').map(Number);
+                lon2560 = (ms1 / MILLI_PER_SECOND) * MICRO2560_PER_SECOND;
+                lat2560 = (ms2 / MILLI_PER_SECOND) * MICRO2560_PER_SECOND;
+                updateAllInputs(lon2560, lat2560);
+            }
+        } else if (activeInput === subsecondInput) {
+            const value = validateCoordinateInput(subsecondInput, 'decimal');
+            if (value) {
+                const [ss1, ss2] = value.split(' ').map(Number);
+                lon2560 = ss1;
+                lat2560 = ss2;
+                updateAllInputs(lon2560, lat2560);
+            }
+        }
+    } catch (error) {
+        // 如果转换失败，清空其他输入框
+        if (activeInput !== dmsInput) dmsInput.value = '';
+        if (activeInput !== degreeInput) degreeInput.value = '';
+        if (activeInput !== secondInput) secondInput.value = '';
+        if (activeInput !== millisecondInput) millisecondInput.value = '';
+        if (activeInput !== subsecondInput) subsecondInput.value = '';
+    }
+}
+
+// 更新所有输入框的值
+function updateAllInputs(lon2560, lat2560) {
+    const dmsInput = document.getElementById('coordDMSInput');
+    const degreeInput = document.getElementById('coordDegreeInput');
+    const secondInput = document.getElementById('secondInput');
+    const millisecondInput = document.getElementById('millisecondInput');
+    const subsecondInput = document.getElementById('subsecondInput');
+    
+    // 计算十进制度数
+    const lng = lon2560 / SECONDS_PER_DEGREE / MICRO2560_PER_SECOND;
+    const lat = lat2560 / SECONDS_PER_DEGREE / MICRO2560_PER_SECOND;
+    
     // 更新各个单位的值
-    degreeInput.value = `${(lon2560 / SECONDS_PER_DEGREE / MICRO2560_PER_SECOND).toFixed(6)} ${(lat2560 / SECONDS_PER_DEGREE / MICRO2560_PER_SECOND).toFixed(6)}`;
+    dmsInput.value = convertDecimalToDMS(lng, lat);
+    degreeInput.value = `${lng.toFixed(6)} ${lat.toFixed(6)}`;
     secondInput.value = `${(lon2560 / MICRO2560_PER_SECOND).toFixed(4)} ${(lat2560 / MICRO2560_PER_SECOND).toFixed(4)}`;
     millisecondInput.value = `${Math.floor(lon2560 / MICRO2560_PER_SECOND * 1000)} ${Math.floor(lat2560 / MICRO2560_PER_SECOND * 1000)}`;
     subsecondInput.value = `${Math.floor(lon2560)} ${Math.floor(lat2560)}`;
@@ -386,6 +479,7 @@ document.getElementById('angleDegreeInput').addEventListener('input', convertAng
 document.getElementById('angleRadianInput').addEventListener('input', convertAngle);
 
 // 添加经纬度转换的事件监听
+document.getElementById('coordDMSInput').addEventListener('input', convertCoordinate);
 document.getElementById('coordDegreeInput').addEventListener('input', convertCoordinate);
 document.getElementById('secondInput').addEventListener('input', convertCoordinate);
 document.getElementById('millisecondInput').addEventListener('input', convertCoordinate);
@@ -572,8 +666,9 @@ function initMap(lat, lng) {
             };
             div.onclick = function(e) {
                 e.preventDefault();
-                // 触发第一个工具按钮的点击事件
-                document.querySelector('.tool-btn[data-tool="number"]').click();
+                e.stopPropagation();
+                // 触发经纬度转换按钮的点击事件
+                document.querySelector('.tool-btn[data-tool="coordinate"]').click();
             };
             return div;
         };
@@ -616,19 +711,26 @@ function updateMapPosition(lat, lng) {
         return;
     }
 
+    // 等待地图移动完成后更新标记
+    currentMap.once('move', function() {
+        // 更新标记位置
+        if (currentMarker) {
+            currentMarker.setLatLng([lat, lng])
+                .setPopupContent(`经纬度: ${lat}, ${lng}`)
+                .openPopup();
+        } else {
+            currentMarker = L.marker([lat, lng]).addTo(currentMap)
+                .bindPopup(`经纬度: ${lat}, ${lng}`)
+                .openPopup();
+        }
+    });
+
+    // 强制地图重新计算尺寸
+    currentMap.invalidateSize();
+
     // 更新地图中心点
     currentMap.setView([lat, lng], currentMap.getZoom());
 
-    // 更新标记位置
-    if (currentMarker) {
-        currentMarker.setLatLng([lat, lng])
-            .setPopupContent(`经纬度: ${lat}, ${lng}`)
-            .openPopup();
-    } else {
-        currentMarker = L.marker([lat, lng]).addTo(currentMap)
-            .bindPopup(`经纬度: ${lat}, ${lng}`)
-            .openPopup();
-    }
 }
 
 // 清空所有输入框
