@@ -274,7 +274,7 @@ function validateCoordinateInput(input, type) {
         switch(type) {
             case 'float':
                 // 允许数字和小数点，但确保只有一个小数点
-                filteredPart = part.replace(/[^0-9.]/g, '');
+                filteredPart = part.replace(/[^-0-9.]/g, '');
                 const decimalParts = filteredPart.split('.');
                 if (decimalParts.length > 2) {
                     filteredPart = decimalParts[0] + '.' + decimalParts.slice(1).join('');
@@ -286,7 +286,7 @@ function validateCoordinateInput(input, type) {
                 break;
             case 'decimal':
                 // 只允许数字
-                filteredPart = part.replace(/[^0-9]/g, '');
+                filteredPart = part.replace(/[^-0-9]/g, '');
                 break;
         }
         return filteredPart;
