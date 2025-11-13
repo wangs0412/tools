@@ -132,39 +132,39 @@ function validateInput(input, type) {
     return filteredValue;
 }
 
-// 进制转换功能
+// 进制转换功能（支持大数值）
 function convertNumber() {
     const binaryInput = document.getElementById('binaryInput');
     const decimalInput = document.getElementById('decimalInput');
     const hexInput = document.getElementById('hexInput');
-    
+
     // 获取当前输入框的值（经过验证和过滤）
     const binaryValue = validateInput(binaryInput, 'binary');
     const decimalValue = validateInput(decimalInput, 'decimal');
     const hexValue = validateInput(hexInput, 'hex');
-    
+
     // 确定哪个输入框被修改
     const activeInput = document.activeElement;
-    
+
     try {
-        let decimal;
-        
-        // 根据当前输入框计算十进制值
+        let bigIntValue;
+
+        // 根据当前输入框计算十进制值（使用 BigInt 支持大数值）
         if (activeInput === binaryInput && binaryValue) {
-            decimal = parseInt(binaryValue, 2);
-            if (isNaN(decimal)) throw new Error('无效的二进制数');
-            decimalInput.value = decimal;
-            hexInput.value = decimal.toString(16).toUpperCase();
+            // 使用 BigInt 处理二进制转换
+            bigIntValue = BigInt('0b' + binaryValue);
+            decimalInput.value = bigIntValue.toString(10);
+            hexInput.value = bigIntValue.toString(16).toUpperCase();
         } else if (activeInput === decimalInput && decimalValue) {
-            decimal = parseInt(decimalValue, 10);
-            if (isNaN(decimal)) throw new Error('无效的十进制数');
-            binaryInput.value = decimal.toString(2);
-            hexInput.value = decimal.toString(16).toUpperCase();
+            // 使用 BigInt 处理十进制转换
+            bigIntValue = BigInt(decimalValue);
+            binaryInput.value = bigIntValue.toString(2);
+            hexInput.value = bigIntValue.toString(16).toUpperCase();
         } else if (activeInput === hexInput && hexValue) {
-            decimal = parseInt(hexValue, 16);
-            if (isNaN(decimal)) throw new Error('无效的十六进制数');
-            binaryInput.value = decimal.toString(2);
-            decimalInput.value = decimal;
+            // 使用 BigInt 处理十六进制转换
+            bigIntValue = BigInt('0x' + hexValue);
+            binaryInput.value = bigIntValue.toString(2);
+            decimalInput.value = bigIntValue.toString(10);
         }
     } catch (error) {
         // 如果转换失败，清空其他输入框
