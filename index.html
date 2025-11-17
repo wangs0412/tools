@@ -38,6 +38,7 @@
             <button class="tool-btn" data-tool="coordinate">经纬度转换</button>
             <button class="tool-btn" data-tool="map">地图查看</button>
             <button class="tool-btn" data-tool="rgb">颜色转换</button>
+            <button class="tool-btn" data-tool="text">文本处理</button>
         </div>
 
         <!-- 工具内容区域 -->
@@ -589,6 +590,65 @@
                     <div class="color-code-item">
                         <div class="color-swatch" style="background-color: #000000"></div>
                         <span class="color-hex">#000000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文本处理工具 -->
+            <div class="tool-section hidden" id="text-tool">
+                <div class="text-editor-container">
+                    <div class="editor-wrapper">
+                        <label for="textEditor">文本编辑器</label>
+                        <textarea id="textEditor" class="text-editor" placeholder="在此粘贴或输入文本内容..."></textarea>
+                    </div>
+                    <div class="vim-command-wrapper">
+                        <div class="label-with-help">
+                            <label for="vimCommands">Vim 命令 (每行一条命令)</label>
+                            <span class="help-icon" title="查看支持的命令">?</span>
+                        </div>
+                        <div class="command-help hidden">
+                            <h4>支持的命令:</h4>
+                            <div class="help-section">
+                                <strong>删除命令</strong>
+                                <ul>
+                                    <li><code>dd</code> 或 <code>1d</code> - 删除第一行</li>
+                                    <li><code>5d</code> - 删除第5行</li>
+                                    <li><code>2,5d</code> - 删除第2-5行</li>
+                                    <li><code>%d</code> - 删除所有行</li>
+                                </ul>
+                            </div>
+                            <div class="help-section">
+                                <strong>替换命令</strong>
+                                <ul>
+                                    <li><code>s/old/new/</code> - 替换第一个匹配</li>
+                                    <li><code>%s/old/new/g</code> - 全局替换</li>
+                                    <li><code>%s/old/new/gi</code> - 全局替换(忽略大小写)</li>
+                                </ul>
+                            </div>
+                            <div class="help-section">
+                                <strong>过滤命令</strong>
+                                <ul>
+                                    <li><code>g/pattern/d</code> - 删除匹配的行</li>
+                                    <li><code>v/pattern/d</code> - 删除不匹配的行(保留匹配的)</li>
+                                    <li><code>g/^$/d</code> - 删除空行</li>
+                                </ul>
+                            </div>
+                            <div class="help-section">
+                                <strong>排序命令</strong>
+                                <ul>
+                                    <li><code>sort</code> - 字母排序</li>
+                                    <li><code>sort!</code> - 反向排序</li>
+                                    <li><code>sort n</code> - 数字排序</li>
+                                    <li><code>sort u</code> - 去重排序</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <textarea id="vimCommands" class="vim-commands" placeholder="输入 vim 命令，例如：&#10;dd&#10;:2,5d&#10;:%s/old/new/g&#10;:g/pattern/d&#10;:v/keep/d"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button id="executeBtn" class="action-btn execute-btn">执行命令</button>
+                        <button id="copyBtn" class="action-btn copy-btn">复制文本</button>
+                        <button id="undoBtn" class="action-btn undo-btn" disabled>撤销</button>
                     </div>
                 </div>
             </div>

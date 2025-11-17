@@ -912,4 +912,216 @@ function initRGBTool() {
 
     // 初始化显示
     updateColor();
-} 
+}
+
+// 文本处理工具 - 直接实现 Vim 命令
+let textBeforeExecution = '';
+
+function initTextProcessingTool() {
+    const textEditor = document.getElementById('textEditor');
+    const vimCommands = document.getElementById('vimCommands');
+    const executeBtn = document.getElementById('executeBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const undoBtn = document.getElementById('undoBtn');
+
+    // 执行按钮点击事件
+    executeBtn.addEventListener('click', () => {
+        // 保存执行前的文本状态
+        textBeforeExecution = textEditor.value;
+
+        // 获取vim命令
+        const commands = vimCommands.value.split('\n').filter(cmd => cmd.trim() !== '');
+
+        if (commands.length === 0) {
+            alert('请输入至少一条vim命令');
+            return;
+        }
+
+        try {
+            let text = textEditor.value;
+
+            // 逐条执行命令
+            commands.forEach(cmd => {
+                text = executeVimCommand(text, cmd.trim());
+            });
+
+            textEditor.value = text;
+            undoBtn.disabled = false;
+        } catch (error) {
+            alert('命令执行错误: ' + error.message);
+            textEditor.value = textBeforeExecution;
+        }
+    });
+
+    // 复制按钮点击事件
+    copyBtn.addEventListener('click', () => {
+        textEditor.select();
+        document.execCommand('copy');
+
+        // 视觉反馈
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '已复制!';
+        copyBtn.style.backgroundColor = '#218838';
+
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.style.backgroundColor = '';
+        }, 1500);
+    });
+
+    // 撤销按钮点击事件
+    undoBtn.addEventListener('click', () => {
+        textEditor.value = textBeforeExecution;
+        undoBtn.disabled = true;
+    });
+}
+
+// 初始化帮助图标
+function initHelpIcon() {
+    const helpIcon = document.querySelector('.help-icon');
+    const commandHelp = document.querySelector('.command-help');
+
+    if (helpIcon && commandHelp) {
+        // 帮助图标点击事件
+        helpIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            commandHelp.classList.toggle('hidden');
+        });
+
+        // 点击页面其他地方关闭帮助面板
+        document.addEventListener('click', (e) => {
+            if (!commandHelp.contains(e.target) && e.target !== helpIcon) {
+                commandHelp.classList.add('hidden');
+            }
+        });
+    }
+}
+
+// 执行单条Vim命令
+function executeVimCommand(text, cmd) {
+    if (!cmd) return text;
+
+    // 移除命令前缀的冒号
+    if (cmd.startsWith(':')) {
+        cmd = cmd.substring(1);
+    }
+
+    const lines = text.split('\n');
+
+    // dd - 删除第一行
+    if (cmd === 'dd' || cmd === '1d') {
+        lines.shift();
+        return lines.join('\n');
+    }
+
+    // 删除指定行 (:nd)
+    const deleteSingleMatch = cmd.match(/^(\d+)d$/);
+    if (deleteSingleMatch) {
+        const lineNum = parseInt(deleteSingleMatch[1]) - 1;
+        if (lineNum >= 0 && lineNum < lines.length) {
+            lines.splice(lineNum, 1);
+        }
+        return lines.join('\n');
+    }
+
+    // 删除行范围 (:n,md)
+    const deleteRangeMatch = cmd.match(/^(\d+),(\d+)d$/);
+    if (deleteRangeMatch) {
+        const start = parseInt(deleteRangeMatch[1]) - 1;
+        const end = parseInt(deleteRangeMatch[2]) - 1;
+        if (start >= 0 && start < lines.length && end >= start && end < lines.length) {
+            lines.splice(start, end - start + 1);
+        }
+        return lines.join('\n');
+    }
+
+    // 替换命令 (:s/old/new/ 或 :%s/old/new/g)
+    const substituteMatch = cmd.match(/^(%?)s\/(.+?)\/(.*?)\/?([gi]*)$/);
+    if (substituteMatch) {
+        const isGlobal = substituteMatch[1] === '%';
+        const pattern = substituteMatch[2];
+        const replacement = substituteMatch[3];
+        let flags = substituteMatch[4] || '';
+
+        // %s 自动全局替换
+        if (isGlobal && !flags.includes('g')) {
+            flags += 'g';
+        }
+
+        try {
+            const regex = new RegExp(pattern, flags);
+            return text.replace(regex, replacement);
+        } catch (e) {
+            throw new Error(`替换命令正则表达式错误: ${e.message}`);
+        }
+    }
+
+    // 删除匹配的行 (:g/pattern/d)
+    const globalDeleteMatch = cmd.match(/^g\/(.+?)\/d$/);
+    if (globalDeleteMatch) {
+        const pattern = globalDeleteMatch[1];
+        try {
+            const regex = new RegExp(pattern);
+            const filteredLines = lines.filter(line => !regex.test(line));
+            return filteredLines.join('\n');
+        } catch (e) {
+            throw new Error(`g命令正则表达式错误: ${e.message}`);
+        }
+    }
+
+    // 删除不匹配的行 (:v/pattern/d 或 :g!/pattern/d)
+    const inverseGlobalMatch = cmd.match(/^v\/(.+?)\/d$/) || cmd.match(/^g!\/(.+?)\/d$/);
+    if (inverseGlobalMatch) {
+        const pattern = inverseGlobalMatch[1];
+        try {
+            const regex = new RegExp(pattern);
+            const filteredLines = lines.filter(line => regex.test(line));
+            return filteredLines.join('\n');
+        } catch (e) {
+            throw new Error(`v命令正则表达式错误: ${e.message}`);
+        }
+    }
+
+    // 排序 (:sort)
+    if (cmd === 'sort') {
+        return lines.sort().join('\n');
+    }
+
+    // 反向排序 (:sort!)
+    if (cmd === 'sort!') {
+        return lines.sort().reverse().join('\n');
+    }
+
+    // 数字排序 (:sort n)
+    if (cmd === 'sort n') {
+        return lines.sort((a, b) => {
+            const numA = parseFloat(a) || 0;
+            const numB = parseFloat(b) || 0;
+            return numA - numB;
+        }).join('\n');
+    }
+
+    // 去重 (:sort u)
+    if (cmd === 'sort u') {
+        const uniqueLines = [...new Set(lines)];
+        return uniqueLines.sort().join('\n');
+    }
+
+    // 删除空行 (:g/^$/d)
+    if (cmd === 'g/^$/d') {
+        return lines.filter(line => line.trim() !== '').join('\n');
+    }
+
+    // 删除所有行 (:%d 或 :1,$d)
+    if (cmd === '%d' || cmd === '1,$d') {
+        return '';
+    }
+
+    throw new Error(`不支持的命令: :${cmd}`);
+}
+
+// 初始化文本处理工具
+document.addEventListener('DOMContentLoaded', function() {
+    initTextProcessingTool();
+    initHelpIcon();
+}); 

@@ -564,3 +564,289 @@ input::placeholder {
         height: 18px;
     }
 }
+
+/* 文本处理工具样式 */
+.text-editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.editor-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
+}
+
+.editor-wrapper label,
+.vim-command-wrapper label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* 文本编辑器样式 */
+.text-editor {
+    flex: 1;
+    width: 100%;
+    min-height: 500px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    line-height: 1.5;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    resize: vertical;
+}
+
+.text-editor:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.1);
+    background-color: var(--card-background);
+}
+
+/* Vim 命令输入框样式 */
+.vim-command-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.label-with-help {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.label-with-help label {
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* 帮助图标样式 */
+.help-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.help-icon:hover {
+    background-color: var(--hover-color);
+    transform: scale(1.1);
+}
+
+/* 命令帮助面板样式 */
+.command-help {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background-color: var(--card-background);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.command-help.hidden {
+    display: none;
+}
+
+.command-help h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.help-section {
+    margin-bottom: 1rem;
+}
+
+.help-section strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.help-section ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.help-section li {
+    padding: 0.3rem 0;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.help-section code {
+    background-color: var(--background-color);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+}
+
+.vim-commands {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    line-height: 1.5;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    resize: vertical;
+}
+
+.vim-commands:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.1);
+    background-color: var(--card-background);
+}
+
+/* 按钮组样式 */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.execute-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.execute-btn:hover:not(:disabled) {
+    background-color: var(--hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 107, 255, 0.3);
+}
+
+.execute-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.copy-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.copy-btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.undo-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.undo-btn:hover:not(:disabled) {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+.undo-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* 暗色主题下的文本处理工具样式 */
+[data-theme="dark"] .text-editor,
+[data-theme="dark"] .vim-commands {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border-color: #404040;
+}
+
+[data-theme="dark"] .text-editor:focus,
+[data-theme="dark"] .vim-commands:focus {
+    border-color: var(--primary-color);
+    background-color: #2d2d2d;
+}
+
+[data-theme="dark"] .text-editor::placeholder,
+[data-theme="dark"] .vim-commands::placeholder {
+    color: #808080;
+}
+
+[data-theme="dark"] .command-help {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+[data-theme="dark"] .help-section code {
+    background-color: #1a1a1a;
+    border-color: #404040;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .text-editor {
+        min-height: 400px;
+    }
+
+    .editor-wrapper {
+        min-height: 400px;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        width: 100%;
+    }
+
+    .command-help {
+        max-height: 300px;
+    }
+}
