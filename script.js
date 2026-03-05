@@ -579,28 +579,28 @@ function initMap(lat, lng) {
         });
 
         // 添加Google Maps图层
-        const googleNormalLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=m&x={x}&y={y}&z={z}', {
+        const googleNormalLayer = L.tileLayer('https://wkmap.4316644.xyz/maps/vt?lyrs=m&x={x}&y={y}&z={z}', {
             subdomains: ['0', '1', '2', '3'],
             attribution: 'Google Maps',
             maxZoom: 20,
             minZoom: 3
         });
 
-        const googleSatelliteLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=s&x={x}&y={y}&z={z}', {
+        const googleSatelliteLayer = L.tileLayer('https://wkmap.4316644.xyz/maps/vt?lyrs=s&x={x}&y={y}&z={z}', {
             subdomains: ['0', '1', '2', '3'],
             attribution: 'Google Maps',
             maxZoom: 20,
             minZoom: 3
         });
 
-        const googleTerrainLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=p&x={x}&y={y}&z={z}', {
+        const googleTerrainLayer = L.tileLayer('https://wkmap.4316644.xyz/maps/vt?lyrs=p&x={x}&y={y}&z={z}', {
             subdomains: ['0', '1', '2', '3'],
             attribution: 'Google Maps',
             maxZoom: 20,
             minZoom: 3
         });
 
-        const googleHybridLayer = L.tileLayer('https://wkmap.wangs.blog/maps/vt?lyrs=y&x={x}&y={y}&z={z}', {
+        const googleHybridLayer = L.tileLayer('https://wkmap.4316644.xyz/maps/vt?lyrs=y&x={x}&y={y}&z={z}', {
             subdomains: ['0', '1', '2', '3'],
             attribution: 'Google Maps',
             maxZoom: 20,
