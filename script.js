@@ -1,6 +1,10 @@
 // 全局变量
 let currentMap = null;
 let currentMarker = null;
+let lastNonMapTool = 'number';
+let pendingMapInit = null;
+let trackLayerGroup = null;
+let trackInfoControl = null;
 
 // 主题切换功能
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,7 +47,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 切换到地图页面
+        pendingMapInit = { lat, lng };
         document.querySelector('.tool-btn[data-tool="map"]').click();
+        pendingMapInit = null;
 
         // 更新地图位置
         updateMapPosition(lat, lng);
@@ -63,6 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const toolsContainer = document.querySelector('.tools-container');
             const map = document.getElementById('map');
             
+            if (toolId !== 'map') {
+                lastNonMapTool = toolId;
+            }
+
             if (toolId === 'map') {
                 datetimeInfo.style.display = 'none';
                 toolsContainer.style.display = 'none';
@@ -70,7 +80,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 map.classList.remove('hidden');
                 document.getElementById('theme-toggle').style.display = 'none';
                 if (!currentMap) {
-                    initMap(39.9042, 116.4074); // 默认显示北京
+                    const lat = pendingMapInit ? pendingMapInit.lat : 39.9042;
+                    const lng = pendingMapInit ? pendingMapInit.lng : 116.4074;
+                    initMap(lat, lng);
                 }
             } else {
                 datetimeInfo.style.display = 'block';
@@ -93,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     initRGBTool();
+    initTrackTool();
 });
 
 // 输入验证和过滤功能
@@ -667,8 +680,9 @@ function initMap(lat, lng) {
             div.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                // 触发经纬度转换按钮的点击事件
-                document.querySelector('.tool-btn[data-tool="coordinate"]').click();
+                const target = document.querySelector(`.tool-btn[data-tool="${lastNonMapTool}"]`)
+                    || document.querySelector('.tool-btn[data-tool="coordinate"]');
+                target.click();
             };
             return div;
         };
@@ -731,6 +745,400 @@ function updateMapPosition(lat, lng) {
     // 更新地图中心点
     currentMap.setView([lat, lng], currentMap.getZoom());
 
+}
+
+function parseCsvLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    result.push(current.trim());
+    return result;
+}
+
+function splitCoordRow(line) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+        return [];
+    }
+    if (trimmed.includes('\t')) {
+        return trimmed.split('\t').map(cell => cell.trim());
+    }
+    if (trimmed.includes(';')) {
+        return trimmed.split(';').map(cell => cell.trim());
+    }
+    if (trimmed.includes(',')) {
+        return parseCsvLine(trimmed);
+    }
+    return trimmed.split(/\s+/);
+}
+
+function parseCoordNumber(cell) {
+    if (cell == null) {
+        return NaN;
+    }
+    let value = String(cell).trim().replace(/^["']|["']$/g, '');
+    if (!value) {
+        return NaN;
+    }
+    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(value)) {
+        value = value.replace(/,/g, '');
+    }
+    const number = Number(value);
+    return Number.isFinite(number) ? number : NaN;
+}
+
+function detectHeaderColumns(cells) {
+    let lonCol = -1;
+    let latCol = -1;
+    cells.forEach((cell, index) => {
+        const header = String(cell).toLowerCase().replace(/["']/g, '').trim();
+        if (lonCol < 0 && /(longitude|\blng\b|\blon\b|\blong\b|经度)/.test(header) && !/latitude|纬度/.test(header)) {
+            lonCol = index;
+        }
+        if (latCol < 0 && /(latitude|\blat\b|纬度)/.test(header)) {
+            latCol = index;
+        }
+    });
+    if (lonCol >= 0 && latCol >= 0) {
+        return { lonCol, latCol };
+    }
+    return null;
+}
+
+function detectLonLatColumns(rows) {
+    if (rows.length === 0) {
+        return null;
+    }
+
+    const colCount = Math.max(...rows.map(row => row.length));
+    const scores = [];
+
+    for (let col = 0; col < colCount; col++) {
+        const values = rows.map(row => parseCoordNumber(row[col])).filter(Number.isFinite);
+        const ratio = values.length / rows.length;
+        const hasDecimal = values.some(value => Math.abs(value % 1) > 1e-8);
+        const allLon = values.length > 0 && values.every(value => Math.abs(value) <= 180);
+        const allLat = values.length > 0 && values.every(value => Math.abs(value) <= 90);
+        const uniqueCount = new Set(values.map(value => Number(value.toFixed(6)))).size;
+        const definitelyLon = values.some(value => Math.abs(value) > 90 && Math.abs(value) <= 180);
+
+        let lonScore = 0;
+        let latScore = 0;
+        if (ratio >= 0.8 && hasDecimal) {
+            if (allLon) {
+                lonScore = 2 + (definitelyLon ? 4 : 0) + (uniqueCount > 1 ? 1 : 0);
+            }
+            if (allLat) {
+                latScore = 3 + (uniqueCount > 1 ? 1 : 0) + (definitelyLon ? -10 : 0);
+            }
+        }
+        scores.push({ col, lonScore, latScore });
+    }
+
+    const lonBest = [...scores].sort((a, b) => b.lonScore - a.lonScore)[0];
+    const latBest = [...scores].filter(item => item.col !== lonBest.col).sort((a, b) => b.latScore - a.latScore)[0];
+
+    if (lonBest && latBest && lonBest.lonScore > 0 && latBest.latScore > 0) {
+        return { lonCol: lonBest.col, latCol: latBest.col };
+    }
+
+    if (colCount === 2) {
+        const first = parseCoordNumber(rows[0][0]);
+        const second = parseCoordNumber(rows[0][1]);
+        if (Number.isFinite(first) && Number.isFinite(second)) {
+            if (Math.abs(first) <= 90 && Math.abs(second) > 90 && Math.abs(second) <= 180) {
+                return { lonCol: 1, latCol: 0 };
+            }
+            return { lonCol: 0, latCol: 1 };
+        }
+    }
+
+    return null;
+}
+
+function parseCoordinateText(text) {
+    const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim());
+    if (lines.length === 0) {
+        return { points: [], skipped: 0 };
+    }
+
+    const rows = lines.map(splitCoordRow).filter(row => row.length > 0);
+    let dataRows = rows;
+    let columns = detectHeaderColumns(rows[0]);
+    if (columns) {
+        dataRows = rows.slice(1);
+    } else {
+        columns = detectLonLatColumns(dataRows);
+    }
+
+    if (!columns) {
+        return { points: [], skipped: dataRows.length };
+    }
+
+    const points = [];
+    let skipped = 0;
+    dataRows.forEach(row => {
+        const lng = parseCoordNumber(row[columns.lonCol]);
+        const lat = parseCoordNumber(row[columns.latCol]);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat) || Math.abs(lng) > 180 || Math.abs(lat) > 90) {
+            skipped += 1;
+            return;
+        }
+        points.push([lat, lng]);
+    });
+
+    return { points, skipped };
+}
+
+function distanceMeters(a, b) {
+    const earthRadius = 6371000;
+    const toRad = deg => deg * Math.PI / 180;
+    const dLat = toRad(b[0] - a[0]);
+    const dLng = toRad(b[1] - a[1]);
+    const h = Math.sin(dLat / 2) ** 2
+        + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng / 2) ** 2;
+    return 2 * earthRadius * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function trackLengthMeters(points) {
+    let total = 0;
+    for (let i = 1; i < points.length; i++) {
+        total += distanceMeters(points[i - 1], points[i]);
+    }
+    return total;
+}
+
+function trackIntervalStats(points) {
+    const intervals = [];
+    for (let i = 1; i < points.length; i++) {
+        intervals.push(distanceMeters(points[i - 1], points[i]));
+    }
+    if (intervals.length === 0) {
+        return { intervals, min: 0, max: 0, avg: 0 };
+    }
+    return {
+        intervals,
+        min: Math.min(...intervals),
+        max: Math.max(...intervals),
+        avg: intervals.reduce((sum, value) => sum + value, 0) / intervals.length
+    };
+}
+
+function formatTrackDistance(meters) {
+    if (meters < 10) {
+        return `${meters.toFixed(1)} m`;
+    }
+    if (meters < 1000) {
+        return `${Math.round(meters)} m`;
+    }
+    return `${(meters / 1000).toFixed(2)} km`;
+}
+
+function clearTrack() {
+    if (trackLayerGroup && currentMap) {
+        currentMap.removeLayer(trackLayerGroup);
+    }
+    trackLayerGroup = null;
+    if (trackInfoControl && currentMap) {
+        currentMap.removeControl(trackInfoControl);
+    }
+    trackInfoControl = null;
+}
+
+function addTrackInfoControl(pointCount, distanceText, intervalStats) {
+    if (!currentMap) {
+        return;
+    }
+    if (trackInfoControl) {
+        currentMap.removeControl(trackInfoControl);
+    }
+
+    const intervalHtml = intervalStats && intervalStats.intervals.length > 0
+        ? `<div>平均间隔 ${formatTrackDistance(intervalStats.avg)}</div>
+            <div>最小 ${formatTrackDistance(intervalStats.min)} · 最大 ${formatTrackDistance(intervalStats.max)}</div>`
+        : '';
+
+    trackInfoControl = L.control({ position: 'bottomright' });
+    trackInfoControl.onAdd = function() {
+        const div = L.DomUtil.create('div', 'track-info-control');
+        div.innerHTML = `
+            <div class="track-info-title">飞行轨迹</div>
+            <div>${pointCount} 个点 · ${distanceText}</div>
+            ${intervalHtml}
+            <button type="button">清除轨迹</button>
+        `;
+        const button = div.querySelector('button');
+        L.DomEvent.disableClickPropagation(div);
+        button.onclick = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            clearTrack();
+        };
+        return div;
+    };
+    trackInfoControl.addTo(currentMap);
+}
+
+function trackPointPopup(index, total, point, prevMeters, nextMeters) {
+    const lines = [];
+    if (index === 0) {
+        lines.push('起点');
+    } else if (index === total - 1) {
+        lines.push('终点');
+    }
+    lines.push(`点 ${index + 1} / ${total}`);
+    lines.push(`${point[0].toFixed(6)}, ${point[1].toFixed(6)}`);
+    if (prevMeters != null) {
+        lines.push(`距上一点：${formatTrackDistance(prevMeters)}`);
+    }
+    if (nextMeters != null) {
+        lines.push(`距下一点：${formatTrackDistance(nextMeters)}`);
+    }
+    return lines.join('<br>');
+}
+
+function drawTrackPointCircles(points, intervals) {
+    const lastIndex = points.length - 1;
+    points.forEach((point, index) => {
+        const prevMeters = index > 0 ? intervals[index - 1] : null;
+        const nextMeters = index < lastIndex ? intervals[index] : null;
+        const isStart = index === 0;
+        const isEnd = index === lastIndex && points.length > 1;
+        const circle = L.circleMarker(point, {
+            radius: isStart || isEnd ? 8 : 6,
+            color: '#ffffff',
+            weight: 2,
+            fillColor: isStart ? '#28a745' : (isEnd ? '#dc3545' : '#4a6bff'),
+            fillOpacity: 0.95,
+            pane: 'markerPane'
+        }).addTo(trackLayerGroup);
+
+        circle.bindPopup(trackPointPopup(index, points.length, point, prevMeters, nextMeters));
+        const tooltipParts = [`#${index + 1}`];
+        if (prevMeters != null) {
+            tooltipParts.push(`间隔 ${formatTrackDistance(prevMeters)}`);
+        }
+        circle.bindTooltip(tooltipParts.join(' · '), {
+            direction: 'top',
+            opacity: 0.9,
+            sticky: true
+        });
+    });
+}
+
+function drawTrack(points) {
+    if (!currentMap || points.length === 0) {
+        return;
+    }
+
+    clearTrack();
+
+    if (currentMarker) {
+        currentMap.removeLayer(currentMarker);
+        currentMarker = null;
+    }
+
+    trackLayerGroup = L.layerGroup().addTo(currentMap);
+    const intervalStats = trackIntervalStats(points);
+    const distanceText = formatTrackDistance(trackLengthMeters(points));
+
+    if (points.length >= 2) {
+        const polyline = L.polyline(points, {
+            color: '#4a6bff',
+            weight: 3,
+            opacity: 0.75,
+            lineJoin: 'round'
+        }).addTo(trackLayerGroup);
+        polyline.bindPopup(`轨迹：${points.length} 个点<br>长度：${distanceText}<br>平均间隔：${formatTrackDistance(intervalStats.avg)}`);
+    }
+
+    drawTrackPointCircles(points, intervalStats.intervals);
+
+    addTrackInfoControl(points.length, distanceText, intervalStats);
+    currentMap.invalidateSize();
+
+    if (points.length === 1) {
+        currentMap.setView(points[0], Math.max(currentMap.getZoom(), 14));
+    } else {
+        currentMap.fitBounds(L.latLngBounds(points), {
+            padding: [48, 48],
+            maxZoom: 16
+        });
+    }
+}
+
+function updateTrackParseStatus() {
+    const input = document.getElementById('trackDataInput');
+    const status = document.getElementById('trackParseStatus');
+    if (!input || !status) {
+        return { points: [], skipped: 0 };
+    }
+
+    const parsed = parseCoordinateText(input.value);
+    if (parsed.points.length === 0) {
+        status.textContent = input.value.trim() ? '未识别到有效经纬度，请检查粘贴内容' : '尚未解析到坐标点';
+        status.classList.remove('has-points');
+    } else {
+        const skippedText = parsed.skipped > 0 ? `，跳过 ${parsed.skipped} 行无效数据` : '';
+        status.textContent = `已解析 ${parsed.points.length} 个点${skippedText}`;
+        status.classList.add('has-points');
+    }
+    return parsed;
+}
+
+function showTrackOnMap() {
+    const parsed = updateTrackParseStatus();
+    if (parsed.points.length === 0) {
+        alert('请先粘贴有效的经纬度数据');
+        return;
+    }
+
+    pendingMapInit = { lat: parsed.points[0][0], lng: parsed.points[0][1] };
+    document.querySelector('.tool-btn[data-tool="map"]').click();
+    pendingMapInit = null;
+    setTimeout(() => drawTrack(parsed.points), 0);
+}
+
+function initTrackTool() {
+    const input = document.getElementById('trackDataInput');
+    const showBtn = document.getElementById('showTrackBtn');
+    const pasteBtn = document.getElementById('pasteTrackBtn');
+    const clearBtn = document.getElementById('clearTrackInputBtn');
+    if (!input || !showBtn || !pasteBtn || !clearBtn) {
+        return;
+    }
+
+    input.addEventListener('input', updateTrackParseStatus);
+    showBtn.addEventListener('click', showTrackOnMap);
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (!text.trim()) {
+                alert('剪贴板为空');
+                return;
+            }
+            input.value = text;
+            updateTrackParseStatus();
+        } catch (error) {
+            alert('无法读取剪贴板，请直接在输入框中使用 Ctrl+V 粘贴');
+        }
+    });
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        updateTrackParseStatus();
+        clearTrack();
+    });
 }
 
 // 清空所有输入框

@@ -37,6 +37,7 @@
             <button class="tool-btn" data-tool="angle">角度弧度转换</button>
             <button class="tool-btn" data-tool="coordinate">经纬度转换</button>
             <button class="tool-btn" data-tool="map">地图查看</button>
+            <button class="tool-btn" data-tool="track">轨迹绘制</button>
             <button class="tool-btn" data-tool="rgb">颜色转换</button>
             <button class="tool-btn" data-tool="text">文本处理</button>
         </div>
@@ -590,6 +591,23 @@
                     <div class="color-code-item">
                         <div class="color-swatch" style="background-color: #000000"></div>
                         <span class="color-hex">#000000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 轨迹绘制工具 -->
+            <div class="tool-section hidden" id="track-tool">
+                <div class="text-editor-container">
+                    <div class="editor-wrapper track-editor-wrapper">
+                        <label for="trackDataInput">粘贴经纬度数据</label>
+                        <p class="track-hint">从 DBeaver 复制 longitude、latitude（也可复制整行）后粘贴。支持 Tab / 逗号 / 空格分隔，可带表头；按粘贴顺序连成折线。</p>
+                        <textarea id="trackDataInput" class="text-editor track-data-input" placeholder="例如：&#10;118.076595	27.383047&#10;118.075800	27.382196&#10;118.076853	27.382395"></textarea>
+                    </div>
+                    <div id="trackParseStatus" class="track-parse-status">尚未解析到坐标点</div>
+                    <div class="button-group">
+                        <button id="showTrackBtn" class="action-btn execute-btn">在地图上显示轨迹</button>
+                        <button id="pasteTrackBtn" class="action-btn copy-btn">从剪贴板粘贴</button>
+                        <button id="clearTrackInputBtn" class="action-btn undo-btn">清空</button>
                     </div>
                 </div>
             </div>
